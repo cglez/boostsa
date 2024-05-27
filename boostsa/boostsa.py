@@ -1,149 +1,19 @@
 # coding=latin-1
-# Non nobis, Domine, non nobis, sed Nomini Tuo da gloriam
-import sys, re, time, json
+import sys
+import re
+import json
+from collections import defaultdict, Counter
+import warnings
+
 import numpy as np
 import pandas as pd
-from collections import defaultdict, Counter
 from tqdm import tqdm
-from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, precision_recall_fscore_support, log_loss, confusion_matrix
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score, precision_recall_fscore_support
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.spatial.distance import jensenshannon
 from scipy.stats import entropy
-import warnings
-###############################################################################
 
-
-def stringtime(n):
-    """
-    :param n: integer, representing a number seconds
-    :return: string representing time, in format hh:mm:ss
-    """
-    h = str(int(n / 3600))
-    m = str(int((n % 3600) / 60))
-    s = str(int((n % 3600) % 60))
-    if len(h) == 1: h = '0' + h
-    if len(m) == 1: m = '0' + m
-    if len(s) == 1: s = '0' + s
-    return h + ':' + m + ':' + s
-
-
-def start(sep=True):
-    """
-    This function prints and returns the present moment
-    :param sep: bool. If True, a separation line is printed on the shell
-    :return: the present moment
-    """
-    stt = time.time()
-    now = time.strftime("%Y/%m/%d %H:%M:%S")
-    if sep: print('#'*80)
-    print('start:', now)
-    return stt
-
-
-def end(stt, sep=True):
-    """
-    The function takes an hour in the past and prints the present moment and the time elapsed from the input moment
-    :param stt: a time.time() variable
-    :param sep: bool. If True, a separation line is printed on the shell
-    :return: the number of seconds between the input hour and the present moment
-    """
-    now = time.time()
-    dur = now - stt
-    str_dur = stringtime(now - stt)
-    str_now = time.strftime("%Y/%m/%d %H:%M:%S")
-    if sep:
-        print('#'*80 + "\nend:", str_now, " - time elapsed:", str_dur + "\n" + '#'*80)
-    else:
-        print("end:", str_now, " - time elapsed:", str_dur)
-    return dur
-
-    
-class BColor:
-    """
-    Class that defines colors for fancy results' printing
-    """
-    reset     = '\033[0m'
-    bold      = '\033[1m'
-    underline = '\033[4m'
-    reversed  = '\033[7m'
-
-    white     = '\033[38;5;0m'
-    cyan      = '\033[38;5;14m'
-    magenta   = '\033[38;5;13m'
-    blue      = '\033[38;5;12m'
-    yellow    = '\033[38;5;11m'
-    green     = '\033[38;5;10m'
-    red       = '\033[38;5;9m'
-    grey      = '\033[38;5;8m'
-    black     = '\033[38;5;0m'
-
-    cleargrey  = '\033[38;5;7m'
-    darkyellow = '\033[38;5;3m'
-    darkred    = '\033[38;5;88m'
-    darkcyan   = '\033[38;5;6m'
-    pink       = '\033[38;5;207m'
-    clearpink  = '\033[38;5;218m'
-    cyangreen  = '\033[38;5;85m'
-    cleargreen = '\033[38;5;192m'
-    olivegreen = '\033[38;5;29m'
-    
-    CEND      = '\33[0m'
-    CBOLD     = '\33[1m'
-    CITALIC   = '\33[3m'
-    CURL      = '\33[4m'
-    CBLINK    = '\33[5m'
-    CBLINK2   = '\33[6m'
-    CSELECTED = '\33[7m'
-
-    CBLACK    = '\33[30m'
-    CRED      = '\33[31m'
-    CGREEN    = '\33[32m'
-    CYELLOW   = '\33[33m'
-    CBLUE     = '\33[34m'
-    CVIOLET   = '\33[35m'
-    CBEIGE    = '\33[36m'
-    CWHITE    = '\33[37m'
-
-    CBLACKBG  = '\33[40m'
-    CREDBG    = '\33[41m'
-    CGREENBG  = '\33[42m'
-    CYELLOWBG = '\33[43m'
-    CBLUEBG   = '\33[44m'
-    CVIOLETBG = '\33[45m'
-    CBEIGEBG  = '\33[46m'
-    CWHITEBG  = '\33[47m'
-
-    CGREY     = '\33[90m'
-    CRED2     = '\33[91m'
-    CGREEN2   = '\33[92m'
-    CYELLOW2  = '\33[93m'
-    CBLUE2    = '\33[94m'
-    CVIOLET2  = '\33[95m'
-    CBEIGE2   = '\33[96m'
-    CWHITE2   = '\33[97m'
-
-    CGREYBG    = '\33[100m'
-    CREDBG2    = '\33[101m'
-    CGREENBG2  = '\33[102m'
-    CYELLOWBG2 = '\33[103m'
-    CBLUEBG2   = '\33[104m'
-    CVIOLETBG2 = '\33[105m'
-    CBEIGEBG2  = '\33[106m'
-    CWHITEBG2  = '\33[107m'
-
-    # red nuances:
-    i2red = {0:  ([255/255, 204/255, 204/255]), # almost white
-             1:  ([255/255, 153/255, 153/255]),
-             2:  ([255/255, 102/255, 102/255]),
-             3:  ([255/255, 51/255,  51/255]),
-             4:  ([255/255, 0/255,   0/255]), # red
-             5:  ([204/255, 0/255,   0/255]),
-             6:  ([153/255, 0/255,   0/255]),
-             7:  ([102/255, 0/255,   0/255]),
-             8:  ([51/255,  0/255,   0/255])} # almost black
-
-
-###############################################################################
+from .util201217 import BColor, start, end
 
 
 class Bootstrap:
@@ -338,9 +208,15 @@ class Bootstrap:
                 h0_countpreds = Counter(h0_preds.flatten())
                 h1_countpreds = Counter(h1_preds.flatten())
                 counttargs    = Counter(targs.flatten())
-                h0_countpreds = [f"class {tup[0]} freq {tup[1]} perc {tup[1] / len(h0_preds) * 100:.2f}%" for tup in sorted({k: h0_countpreds[k] for k in h0_countpreds}.items(), key=lambda item: item[0])]
-                h1_countpreds = [f"class {tup[0]} freq {tup[1]} perc {tup[1] / len(h1_preds) * 100:.2f}%" for tup in sorted({k: h1_countpreds[k] for k in h1_countpreds}.items(), key=lambda item: item[0])]
-                counttargs    = [f"class {tup[0]} freq {tup[1]} perc {tup[1] / len(targs) * 100:.2f}%" for tup in sorted({k: counttargs[k] for k in counttargs}.items(), key=lambda item: item[0])]
+                h0_countpreds = [f"class {tup[0]} freq {tup[1]} perc {tup[1] / len(h0_preds) * 100:.2f}%"
+                                 for tup in sorted({k: h0_countpreds[k] for k in h0_countpreds}.items(),
+                                                   key=lambda item: item[0])]
+                h1_countpreds = [f"class {tup[0]} freq {tup[1]} perc {tup[1] / len(h1_preds) * 100:.2f}%"
+                                 for tup in sorted({k: h1_countpreds[k] for k in h1_countpreds}.items(),
+                                                   key=lambda item: item[0])]
+                counttargs    = [f"class {tup[0]} freq {tup[1]} perc {tup[1] / len(targs) * 100:.2f}%"
+                                 for tup in sorted({k: counttargs[k] for k in counttargs}.items(),
+                                                   key=lambda item: item[0])]
                 print(f"h0: {h0_name} - h1: {h1_name}")
                 print(f"{'targs count:':<15} {counttargs}")
                 print(f"{'h0 preds count:':<15} {h0_countpreds}")

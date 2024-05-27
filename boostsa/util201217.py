@@ -1,13 +1,14 @@
 # coding=latin-1
 import sys
-import re
 import time
 import json
 
-###############################################################################
-
 
 def stringtime(n):
+    """
+    :param n: integer, representing a number seconds
+    :return: string representing time, in format hh:mm:ss
+    """
     h = str(int(n / 3600))
     m = str(int((n % 3600) / 60))
     s = str(int((n % 3600) % 60))
@@ -18,22 +19,33 @@ def stringtime(n):
 
 
 def start(sep=True):
-    start = time.time()
+    """
+    This function prints and returns the present moment
+    :param sep: bool. If True, a separation line is printed on the shell
+    :return: the present moment
+    """
+    stt = time.time()
     now = time.strftime("%Y/%m/%d %H:%M:%S")
     if sep: print('#'*80)
     print('start:', now)
-    return start
+    return stt
 
 
-def end(start, sep=True):
-    end = time.time()
-    dur = end - start
-    str_dur = stringtime(end - start)
-    now = time.strftime("%Y/%m/%d %H:%M:%S")
+def end(stt, sep=True):
+    """
+    The function takes an hour in the past and prints the present moment and the time elapsed from the input moment
+    :param stt: a time.time() variable
+    :param sep: bool. If True, a separation line is printed on the shell
+    :return: the number of seconds between the input hour and the present moment
+    """
+    now = time.time()
+    dur = now - stt
+    str_dur = stringtime(now - stt)
+    str_now = time.strftime("%Y/%m/%d %H:%M:%S")
     if sep:
-        print('#'*80 + "\nend:", now, " - time elapsed:", str_dur + "\n" + '#'*80)
+        print('#'*80 + "\nend:", str_now, " - time elapsed:", str_dur + "\n" + '#'*80)
     else:
-        print("end:", now, " - time elapsed:", str_dur)
+        print("end:", str_now, " - time elapsed:", str_dur)
     return dur
 
 
@@ -77,7 +89,10 @@ def printjson(data, stop=None):
 ###############################################################################
 
 
-class bcolors:
+class BColor:
+    """
+    Class that defines colors for fancy results' printing
+    """
     reset     = '\033[0m'
     bold      = '\033[1m'
     underline = '\033[4m'
@@ -147,15 +162,16 @@ class bcolors:
     CBEIGEBG2  = '\33[106m'
     CWHITEBG2  = '\33[107m'
 
-    i2red = {0:  ([255/255, 204/255, 204/255]), # quasi bianco
-             1:  ([255/255, 153/255, 153/255]),
-             2:  ([255/255, 102/255, 102/255]),
-             3:  ([255/255, 51/255,  51/255]),
-             4:  ([255/255, 0/255,   0/255]), # rosso
-             5:  ([204/255, 0/255,   0/255]),
-             6:  ([153/255, 0/255,   0/255]),
-             7:  ([102/255, 0/255,   0/255]),
-             8:  ([51/255,  0/255,   0/255])} # quasi nero
+    # red nuances:
+    i2red = {0: ([255 / 255, 204 / 255, 204 / 255]),  # almost white
+             1: ([255 / 255, 153 / 255, 153 / 255]),
+             2: ([255 / 255, 102 / 255, 102 / 255]),
+             3: ([255 / 255, 51 / 255, 51 / 255]),
+             4: ([255 / 255, 0 / 255, 0 / 255]),  # red
+             5: ([204 / 255, 0 / 255, 0 / 255]),
+             6: ([153 / 255, 0 / 255, 0 / 255]),
+             7: ([102 / 255, 0 / 255, 0 / 255]),
+             8: ([51 / 255, 0 / 255, 0 / 255])}  # almost black
 
     def examples(self):
         for i in range(0, 16):
@@ -166,5 +182,3 @@ class bcolors:
             for j in range(0, 16):
                 code = str(i * 16 + j)
                 sys.stdout.write(u"\u001b[48;5;" + code + "m " + code.ljust(4))
-
-
