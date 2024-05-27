@@ -344,10 +344,10 @@ class Bootstrap:
                 sample_h0_preds = h0_preds[i_sample]
                 sample_h1_preds = h1_preds[i_sample]
                 df_sample_tot, df_sample_tgt = self.metrics(sample_targs, sample_h0_preds, sample_h1_preds, targetclass=targetclass)
-                if df_sample_tot.d_acc[-1]   > 2 * diff_acc:  twice_diff_acc  += 1
-                if df_sample_tot.d_f1[-1]    > 2 * diff_f1:   twice_diff_f1   += 1
-                if df_sample_tot.d_prec[-1]  > 2 * diff_prec: twice_diff_prec += 1
-                if df_sample_tot.d_rec[-1]   > 2 * diff_rec:  twice_diff_rec  += 1
+                if df_sample_tot.d_acc.iloc[-1]   > 2 * diff_acc:  twice_diff_acc  += 1
+                if df_sample_tot.d_f1.iloc[-1]    > 2 * diff_f1:   twice_diff_f1   += 1
+                if df_sample_tot.d_prec.iloc[-1]  > 2 * diff_prec: twice_diff_prec += 1
+                if df_sample_tot.d_rec.iloc[-1]   > 2 * diff_rec:  twice_diff_rec  += 1
                 # print(round(diff_f1, 4), "***", round(df_sample_tot.d_f1[-1], 4), "***", twice_diff_f1)
                 if targetclass is not None:
                     if df_sample_tgt.d_tf1[-1]    > 2 * diff_tgt_f1:   twice_diff_tgt_f1   += 1
