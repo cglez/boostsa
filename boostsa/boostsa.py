@@ -322,19 +322,19 @@ class Bootstrap:
         print(f"{'data shape:':<12} {targs.shape}\n{'sample size:':<12} {sample_size}")
         df_tot, df_tgt = self.metrics(targs, h0_preds, h1_preds, h0_name=h0_name, h1_name=h1_name, targetclass=targetclass, verbose=verbose)
         if targs.shape[1] == 1:
-            diff_acc  = df_tot.d_acc[-1]
-            diff_f1   = df_tot.d_f1[-1]
-            diff_prec = df_tot.d_prec[-1]
-            diff_rec  = df_tot.d_rec[-1]
+            diff_acc  = df_tot.d_acc.iloc[-1]
+            diff_f1   = df_tot.d_f1.iloc[-1]
+            diff_prec = df_tot.d_prec.iloc[-1]
+            diff_rec  = df_tot.d_rec.iloc[-1]
             twice_diff_acc  = 0
             twice_diff_f1   = 0
             twice_diff_prec = 0
             twice_diff_rec  = 0
             diff_tgt_f1, diff_tgt_prec, diff_tgt_rec, twice_diff_tgt_f1, twice_diff_tgt_prec, twice_diff_tgt_rec = None, None, None, None, None, None
             if targetclass is not None:
-                diff_tgt_f1   = df_tgt.d_tf1[-1]
-                diff_tgt_prec = df_tgt.d_tprec[-1]
-                diff_tgt_rec  = df_tgt.d_trec[-1]
+                diff_tgt_f1   = df_tgt.d_tf1.iloc[-1]
+                diff_tgt_prec = df_tgt.d_tprec.iloc[-1]
+                diff_tgt_rec  = df_tgt.d_trec.iloc[-1]
                 twice_diff_tgt_f1   = 0
                 twice_diff_tgt_prec = 0
                 twice_diff_tgt_rec  = 0
@@ -348,11 +348,11 @@ class Bootstrap:
                 if df_sample_tot.d_f1.iloc[-1]    > 2 * diff_f1:   twice_diff_f1   += 1
                 if df_sample_tot.d_prec.iloc[-1]  > 2 * diff_prec: twice_diff_prec += 1
                 if df_sample_tot.d_rec.iloc[-1]   > 2 * diff_rec:  twice_diff_rec  += 1
-                # print(round(diff_f1, 4), "***", round(df_sample_tot.d_f1[-1], 4), "***", twice_diff_f1)
+                # print(round(diff_f1, 4), "***", round(df_sample_tot.d_f1.iloc[-1], 4), "***", twice_diff_f1)
                 if targetclass is not None:
-                    if df_sample_tgt.d_tf1[-1]    > 2 * diff_tgt_f1:   twice_diff_tgt_f1   += 1
-                    if df_sample_tgt.d_tprec[-1]  > 2 * diff_tgt_prec: twice_diff_tgt_prec += 1
-                    if df_sample_tgt.d_trec[-1]   > 2 * diff_tgt_rec:  twice_diff_tgt_rec  += 1
+                    if df_sample_tgt.d_tf1.iloc[-1]    > 2 * diff_tgt_f1:   twice_diff_tgt_f1   += 1
+                    if df_sample_tgt.d_tprec.iloc[-1]  > 2 * diff_tgt_prec: twice_diff_tgt_prec += 1
+                    if df_sample_tgt.d_trec.iloc[-1]   > 2 * diff_tgt_rec:  twice_diff_tgt_rec  += 1
             col_sign_f1   = f"{BColor.red}**{BColor.reset}" if twice_diff_f1   / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_f1   / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_f1   / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_f1   / n_loops > 0.99 else ''
             col_sign_acc  = f"{BColor.red}**{BColor.reset}" if twice_diff_acc  / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_acc  / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_acc  / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_acc  / n_loops > 0.99 else ''
             col_sign_prec = f"{BColor.red}**{BColor.reset}" if twice_diff_prec / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_prec / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_prec / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_prec / n_loops > 0.99 else ''
@@ -388,10 +388,10 @@ class Bootstrap:
                 df_tgt.to_csv(f"{self.dirout}results_targetclass.tsv", sep="\t")
             return df_tot, df_tgt
         else:
-            diff_jsd = df_tot.d_jsd[-1]
-            diff_ce  = df_tot.d_ce[-1]
-            diff_sim = df_tot.d_sim[-1]
-            diff_cor = df_tot.d_cor[-1]
+            diff_jsd = df_tot.d_jsd.iloc[-1]
+            diff_ce  = df_tot.d_ce.iloc[-1]
+            diff_sim = df_tot.d_sim.iloc[-1]
+            diff_cor = df_tot.d_cor.iloc[-1]
             twice_diff_jsd = 0
             twice_diff_ce  = 0
             twice_diff_sim = 0
@@ -403,10 +403,10 @@ class Bootstrap:
                 sample_h0_preds = h0_preds[i_sample]
                 sample_h1_preds = h1_preds[i_sample]
                 df_sample_tot, df_sample_tgt = self.metrics(sample_targs, sample_h0_preds, sample_h1_preds, targetclass=targetclass)
-                if df_sample_tot.d_jsd[-1]  > -2 * diff_jsd: twice_diff_jsd  += 1 # lower is better
-                if df_sample_tot.d_ce[-1]   > -2 * diff_ce:  twice_diff_ce   += 1 # lower is better
-                if df_sample_tot.d_sim[-1]  > 2 * diff_sim: twice_diff_sim += 1
-                if df_sample_tot.d_cor[-1]  > 2 * diff_cor: twice_diff_cor += 1
+                if df_sample_tot.d_jsd.iloc[-1]  > -2 * diff_jsd: twice_diff_jsd  += 1 # lower is better
+                if df_sample_tot.d_ce.iloc[-1]   > -2 * diff_ce:  twice_diff_ce   += 1 # lower is better
+                if df_sample_tot.d_sim.iloc[-1]  > 2 * diff_sim: twice_diff_sim += 1
+                if df_sample_tot.d_cor.iloc[-1]  > 2 * diff_cor: twice_diff_cor += 1
             col_sign_jsd = f"{BColor.red}**{BColor.reset}" if twice_diff_jsd / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_jsd / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_jsd / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_jsd / n_loops > 0.99 else ''
             col_sign_ce  = f"{BColor.red}**{BColor.reset}" if twice_diff_ce  / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_ce  / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_ce  / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_ce  / n_loops > 0.99 else ''
             col_sign_sim = f"{BColor.red}**{BColor.reset}" if twice_diff_sim / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_sim / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_sim / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_sim / n_loops > 0.99 else ''
