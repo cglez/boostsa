@@ -338,6 +338,7 @@ class Bootstrap:
                 twice_diff_tgt_f1   = 0
                 twice_diff_tgt_prec = 0
                 twice_diff_tgt_rec  = 0
+
             for _ in tqdm(range(n_loops), desc='bootstrap', ncols=80):
                 i_sample = np.random.choice(range(targs.shape[0]), size=sample_size, replace=True) # Berg-Kirkpatrick, p. 996: "with replacement"
                 sample_targs    = targs[i_sample]
@@ -353,32 +354,48 @@ class Bootstrap:
                     if df_sample_tgt.d_tf1.iloc[-1]    > 2 * diff_tgt_f1:   twice_diff_tgt_f1   += 1
                     if df_sample_tgt.d_tprec.iloc[-1]  > 2 * diff_tgt_prec: twice_diff_tgt_prec += 1
                     if df_sample_tgt.d_trec.iloc[-1]   > 2 * diff_tgt_rec:  twice_diff_tgt_rec  += 1
-            col_sign_f1   = f"{BColor.red}**{BColor.reset}" if twice_diff_f1   / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_f1   / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_f1   / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_f1   / n_loops > 0.99 else ''
-            col_sign_acc  = f"{BColor.red}**{BColor.reset}" if twice_diff_acc  / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_acc  / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_acc  / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_acc  / n_loops > 0.99 else ''
-            col_sign_prec = f"{BColor.red}**{BColor.reset}" if twice_diff_prec / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_prec / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_prec / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_prec / n_loops > 0.99 else ''
-            col_sign_rec  = f"{BColor.red}**{BColor.reset}" if twice_diff_rec  / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_rec  / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_rec  / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_rec  / n_loops > 0.99 else ''
-            sign_f1   = "**" if twice_diff_f1   / n_loops < 0.01 else "*" if twice_diff_f1   / n_loops < 0.05 else "!" if twice_diff_f1   / n_loops > 0.95 else "!!" if twice_diff_f1   / n_loops > 0.99 else ''
-            sign_acc  = "**" if twice_diff_acc  / n_loops < 0.01 else "*" if twice_diff_acc  / n_loops < 0.05 else "!" if twice_diff_acc  / n_loops > 0.95 else "!!" if twice_diff_acc  / n_loops > 0.99 else ''
-            sign_prec = "**" if twice_diff_prec / n_loops < 0.01 else "*" if twice_diff_prec / n_loops < 0.05 else "!" if twice_diff_prec / n_loops > 0.95 else "!!" if twice_diff_prec / n_loops > 0.99 else ''
-            sign_rec  = "**" if twice_diff_rec  / n_loops < 0.01 else "*" if twice_diff_rec  / n_loops < 0.05 else "!" if twice_diff_rec  / n_loops > 0.95 else "!!" if twice_diff_rec  / n_loops > 0.99 else ''
-            str_out = f"\n{'count sample diff f1   is twice tot diff f1':.<50} {twice_diff_f1:<5}/ {n_loops:<8}p < {round((twice_diff_f1 / n_loops), 4):<6} {col_sign_f1}\n" \
-                      f"{'count sample diff prec is twice tot diff prec':.<50} {twice_diff_prec:<5}/ {n_loops:<8}p < {round((twice_diff_prec / n_loops), 4):<6} {col_sign_prec}\n" \
-                      f"{'count sample diff rec  is twice tot diff rec ':.<50} {twice_diff_rec:<5}/ {n_loops:<8}p < {round((twice_diff_rec / n_loops), 4):<6} {col_sign_rec }\n" \
-                      f"{'count sample diff acc  is twice tot diff acc':.<50} {twice_diff_acc:<5}/ {n_loops:<8}p < {round((twice_diff_acc / n_loops), 4):<6} {col_sign_acc }"
-            df_tot.s_f1   = ['', sign_f1]
-            df_tot.s_acc  = ['', sign_acc]
-            df_tot.s_prec = ['', sign_prec]
-            df_tot.s_rec  = ['', sign_rec]
+
+            p_f1 = twice_diff_f1 / n_loops
+            p_acc = twice_diff_acc / n_loops
+            p_prec = twice_diff_prec / n_loops
+            p_rec = twice_diff_rec / n_loops
+
+            col_sign_f1 = self._sign(p_f1, colored=True)
+            col_sign_acc = self._sign(p_acc, colored=True)
+            col_sign_prec = self._sign(p_prec, colored=True)
+            col_sign_rec = self._sign(p_rec, colored=True)
+
+            sign_f1 = self._sign(p_f1)
+            sign_acc = self._sign(p_acc)
+            sign_prec =  self._sign(p_prec)
+            sign_rec = self._sign(p_rec)
+
+            str_out = f"\n{'count sample diff f1   is twice tot diff f1':.<50} {twice_diff_f1:<5}/ {n_loops:<8}p < {round(p_f1, 4):<6} {col_sign_f1}\n" \
+                      f"{'count sample diff prec is twice tot diff prec':.<50} {twice_diff_prec:<5}/ {n_loops:<8}p < {round(p_prec, 4):<6} {col_sign_prec}\n" \
+                      f"{'count sample diff rec  is twice tot diff rec ':.<50} {twice_diff_rec:<5}/ {n_loops:<8}p < {round(p_rec, 4):<6} {col_sign_rec}\n" \
+                      f"{'count sample diff acc  is twice tot diff acc':.<50} {twice_diff_acc:<5}/ {n_loops:<8}p < {round(p_acc, 4):<6} {col_sign_acc}"
+
+            df_tot.s_f1   = ['', f'{sign_f1}{p_f1}']
+            df_tot.s_acc  = ['', f'{sign_acc}{p_acc}']
+            df_tot.s_prec = ['', f'{sign_prec}{p_prec}']
+            df_tot.s_rec  = ['', f'{sign_rec}{p_rec}']
+
             if targetclass is not None:
-                col_sign_tgt_f1   = f"{BColor.red}**{BColor.reset}" if twice_diff_tgt_f1   / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_tgt_f1   / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_tgt_f1   / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_tgt_f1   / n_loops > 0.99 else ''
-                col_sign_tgt_prec = f"{BColor.red}**{BColor.reset}" if twice_diff_tgt_prec / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_tgt_prec / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_tgt_prec / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_tgt_prec / n_loops > 0.99 else ''
-                col_sign_tgt_rec  = f"{BColor.red}**{BColor.reset}" if twice_diff_tgt_rec  / n_loops < 0.01 else f"{BColor.red}*{BColor.reset}" if twice_diff_tgt_rec  / n_loops < 0.05 else f"{BColor.grey}!{BColor.reset}" if twice_diff_tgt_rec  / n_loops > 0.95 else f"{BColor.grey}!!{BColor.reset}" if twice_diff_tgt_rec  / n_loops > 0.99 else ''
-                sign_tgt_f1   = "**" if twice_diff_tgt_f1   / n_loops < 0.01 else "*" if twice_diff_tgt_f1   / n_loops < 0.05 else "!" if twice_diff_tgt_f1   / n_loops > 0.95 else "!!" if twice_diff_tgt_f1   / n_loops > 0.99 else ''
-                sign_tgt_prec = "**" if twice_diff_tgt_prec / n_loops < 0.01 else "*" if twice_diff_tgt_prec / n_loops < 0.05 else "!" if twice_diff_tgt_prec / n_loops > 0.95 else "!!" if twice_diff_tgt_prec / n_loops > 0.99 else ''
-                sign_tgt_rec  = "**" if twice_diff_tgt_rec  / n_loops < 0.01 else "*" if twice_diff_tgt_rec  / n_loops < 0.05 else "!" if twice_diff_tgt_rec  / n_loops > 0.95 else "!!" if twice_diff_tgt_rec  / n_loops > 0.99 else ''
-                str_out += f"\ntarget {targetclass} {'count sample diff f1   is twice tot diff f1':.<50} {twice_diff_tgt_f1:<5}/ {n_loops:<8}p < {round((twice_diff_tgt_f1 / n_loops), 4):<6} {col_sign_tgt_f1}\n" \
-                             f"target {targetclass} {'count sample diff prec is twice tot diff prec':.<50} {twice_diff_tgt_prec:<5}/ {n_loops:<8}p < {round((twice_diff_tgt_prec / n_loops), 4):<6} {col_sign_tgt_prec}\n" \
-                             f"target {targetclass} {'count sample diff rec  is twice tot diff rec ':.<50} {twice_diff_tgt_rec:<5}/ {n_loops:<8}p < {round((twice_diff_tgt_rec / n_loops), 4):<6} {col_sign_tgt_rec }"
+                p_tgt_f1 = twice_diff_tgt_f1 / n_loops
+                p_tgt_prec = twice_diff_tgt_prec / n_loops
+                p_tgt_rec = twice_diff_tgt_rec / n_loops
+
+                col_sign_tgt_f1 = self._sign(p_tgt_f1, colored=True)
+                col_sign_tgt_prec = self._sign(p_tgt_prec, colored=True)
+                col_sign_tgt_rec = self._sign(p_tgt_rec, colored=True)
+
+                sign_tgt_f1 = self._sign(p_tgt_f1)
+                sign_tgt_prec = self._sign(p_tgt_prec)
+                sign_tgt_rec = self._sign(p_tgt_rec)
+
+                str_out += f"\ntarget {targetclass} {'count sample diff f1   is twice tot diff f1':.<50} {twice_diff_tgt_f1:<5}/ {n_loops:<8}p < {round(p_tgt_f1, 4):<6} {col_sign_tgt_f1}\n" \
+                             f"target {targetclass} {'count sample diff prec is twice tot diff prec':.<50} {twice_diff_tgt_prec:<5}/ {n_loops:<8}p < {round(p_tgt_prec, 4):<6} {col_sign_tgt_prec}\n" \
+                             f"target {targetclass} {'count sample diff rec  is twice tot diff rec ':.<50} {twice_diff_tgt_rec:<5}/ {n_loops:<8}p < {round(p_tgt_rec, 4):<6} {col_sign_tgt_rec}"
                 df_tgt.s_tf1   = ['', sign_tgt_f1]
                 df_tgt.s_tprec = ['', sign_tgt_prec]
                 df_tgt.s_trec  = ['', sign_tgt_rec]
@@ -439,11 +456,11 @@ class Bootstrap:
         :return: two pandas DataFrame: the first contain the overall performance,
         the second the target class performance (empty if not requested)
         """
-        startime = start()
+        startime = start(sep=False)
 
         df_tot, df_tgt = pd.DataFrame(), pd.DataFrame()
         for h0_cond in self.data:
-            print('#'*80)
+            #print('#'*80)
             h0_preds_all, h0_targs_all, h0_idxs_all = np.empty([0, self.data[h0_cond]['targs'][0].shape[1]]), np.empty([0, self.data[h0_cond]['targs'][0].shape[1]]), np.empty([0, 1])
             h0_f1_all, h0_f1tgt_all, h0_jsd_all, h0_jsdtgt_all = list(), list(), list(), list()
             for exp_idx, preds, targs, idxs in zip(self.data[h0_cond]['exp_idxs'], self.data[h0_cond]['preds'], self.data[h0_cond]['targs'], self.data[h0_cond]['idxs']):
@@ -464,7 +481,8 @@ class Bootstrap:
                         print(f"{exp_idx:<60} jsd {jsd:.4f}")
 
             for h1_cond in self.data[h0_cond]['h1']:
-                print(f"{'#'*80}\n{h0_cond}   vs   {h1_cond}")
+                #print('#' * 80)
+                print(f'\n\n{h0_cond}   vs   {h1_cond}')
                 h1_preds_all, h1_targs_all, h1_idxs_all = np.empty([0, self.data[h0_cond]['targs'][0].shape[1]]), np.empty([0, self.data[h0_cond]['targs'][0].shape[1]]), np.empty([0, 1])
                 h1_f1_all, h1_f1tgt_all, h1_jsd_all, h1_jsdtgt_all = list(), list(), list(), list()
                 for exp_idx, preds, targs, idxs in zip(self.data[h0_cond]['h1'][h1_cond]['exp_idxs'],
@@ -535,5 +553,18 @@ class Bootstrap:
             self.data2json(f"{self.dirout}outcomes.json")
         if self.savetsv:
             df_tot.to_csv(f"{self.dirout}results.tsv", sep="\t")
-        end(startime)
+        end(startime, sep=False)
         return df_tot, df_tgt
+
+    @staticmethod
+    def _sign(value: float, colored=False) -> str:
+        if value < 0.01:
+            return f'{BColor.red}**{BColor.reset}' if colored else '**'
+        elif value < 0.05:
+            return f'{BColor.red}*{BColor.reset}' if colored else '*'
+        elif value > 0.95:
+            return f'{BColor.grey}!{BColor.reset}' if colored else '!'
+        elif value > 0.99:
+            return f'{BColor.grey}!!{BColor.reset}' if colored else '!!'
+        else:
+            return ''
