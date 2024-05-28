@@ -401,8 +401,8 @@ class Bootstrap:
                 df_tgt.s_trec  = ['', sign_tgt_rec]
             print(str_out)
             if self.savetsv:
-                df_tot.to_csv(f"{self.dirout}results.tsv", sep="\t")
-                df_tgt.to_csv(f"{self.dirout}results_targetclass.tsv", sep="\t")
+                df_tot.to_csv(f"{self.dirout}/{h0_name}_results.csv")
+                df_tgt.to_csv(f"{self.dirout}/{h0_name}_results_targetclass.csv")
             return df_tot, df_tgt
         else:
             diff_jsd = df_tot.d_jsd.iloc[-1]
@@ -442,7 +442,7 @@ class Bootstrap:
             df_tot.s_cor = ['', sign_cor]
             print(str_out)
             if self.savetsv:
-                df_tot.to_csv(f"{self.dirout}results.tsv", sep="\t")
+                df_tot.to_csv(f"{self.dirout}/{h0_name}_results.csv")
             return df_tot, df_tgt
 
     def run(self, n_loops=1000, sample_size=.1, targetclass=None, verbose=False):
@@ -545,14 +545,14 @@ class Bootstrap:
             df_both = pd.concat([df_tot, df_tgt.iloc[:, 1:]], axis=1)
             print(df_both.to_string())
             if self.savetsv:
-                df_tgt.to_csv(f"{self.dirout}results_targetclass.tsv", sep="\t")
-                df_both.to_csv(f"{self.dirout}results_overall.tsv", sep="\t")
+                df_tgt.to_csv(f"{self.dirout}/results_targetclass.csv")
+                df_both.to_csv(f"{self.dirout}/results_overall.csv")
         else:
             print(df_tot.to_string())
         if self.savejson:
-            self.data2json(f"{self.dirout}outcomes.json")
+            self.data2json(f"{self.dirout}/outcomes.json")
         if self.savetsv:
-            df_tot.to_csv(f"{self.dirout}results.tsv", sep="\t")
+            df_tot.to_csv(f"{self.dirout}/results.csv")
         end(startime, sep=False)
         return df_tot, df_tgt
 
