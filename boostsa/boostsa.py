@@ -35,7 +35,7 @@ class Bootstrap:
                                      'h1': defaultdict(lambda: {'exp_idxs': list(), 'preds': list(), 'targs': list(), 'idxs': list(), 'epochs': list()})}
                 Used to store and save to json the class inputs.
         """
-        self.dirout = dir_out + '/' if (dir_out != '') and (not re.search('/$', dir_out)) else dir_out
+        self.dirout = dir_out.rstrip('/') if dir_out != '/' else '/'
         self.savetsv = save_results
         self.savejson = save_outcomes
         self.data = defaultdict(lambda: {'exp_idxs': list(),
@@ -396,8 +396,8 @@ class Bootstrap:
                     f" {self._sign(p_tgt_rec, colored=True)}")
             print(str_out)
             if self.savetsv:
-                df_tot.to_csv(f"{self.dirout}results.tsv", sep="\t")
-                df_tgt.to_csv(f"{self.dirout}results_targetclass.tsv", sep="\t")
+                df_tot.to_csv(f"{self.dirout}/results.tsv", sep="\t")
+                df_tgt.to_csv(f"{self.dirout}/results_targetclass.tsv", sep="\t")
             return df_tot, df_tgt
         else:
             diff_jsd = df_tot.d_jsd.iloc[-1]
@@ -437,7 +437,7 @@ class Bootstrap:
             df_tot.s_cor = ['', sign_cor]
             print(str_out)
             if self.savetsv:
-                df_tot.to_csv(f"{self.dirout}results.tsv", sep="\t")
+                df_tot.to_csv(f"{self.dirout}/results.tsv", sep="\t")
             return df_tot, df_tgt
 
     def run(self, n_loops=1000, sample_size=.1, targetclass=None, verbose=False):
@@ -540,14 +540,14 @@ class Bootstrap:
             df_both = pd.concat([df_tot, df_tgt.iloc[:, 1:]], axis=1)
             print(df_both.to_string())
             if self.savetsv:
-                df_tgt.to_csv(f"{self.dirout}results_targetclass.tsv", sep="\t")
-                df_both.to_csv(f"{self.dirout}results_overall.tsv", sep="\t")
+                df_tgt.to_csv(f"{self.dirout}/results_targetclass.tsv", sep="\t")
+                df_both.to_csv(f"{self.dirout}/results_overall.tsv", sep="\t")
         else:
             print(df_tot.to_string())
         if self.savejson:
-            self.data2json(f"{self.dirout}outcomes.json")
+            self.data2json(f"{self.dirout}/outcomes.json")
         if self.savetsv:
-            df_tot.to_csv(f"{self.dirout}results.tsv", sep="\t")
+            df_tot.to_csv(f"{self.dirout}/results.tsv", sep="\t")
         end(startime, sep=False)
         return df_tot, df_tgt
 
