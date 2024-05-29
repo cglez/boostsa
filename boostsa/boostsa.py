@@ -360,45 +360,40 @@ class Bootstrap:
             p_prec = twice_diff_prec / n_loops
             p_rec = twice_diff_rec / n_loops
 
-            col_sign_f1 = self._sign(p_f1, colored=True)
-            col_sign_acc = self._sign(p_acc, colored=True)
-            col_sign_prec = self._sign(p_prec, colored=True)
-            col_sign_rec = self._sign(p_rec, colored=True)
+            df_tot.s_f1 = ['', f'{self._sign(p_f1)}{p_f1}']
+            df_tot.s_acc = ['', f'{self._sign(p_acc)}{p_acc}']
+            df_tot.s_prec = ['', f'{self._sign(p_prec)}{p_prec}']
+            df_tot.s_rec = ['', f'{self._sign(p_rec)}{p_rec}']
 
-            sign_f1 = self._sign(p_f1)
-            sign_acc = self._sign(p_acc)
-            sign_prec =  self._sign(p_prec)
-            sign_rec = self._sign(p_rec)
-
-            str_out = f"\n{'count sample diff f1   is twice tot diff f1':.<50} {twice_diff_f1:<5}/ {n_loops:<8}p < {round(p_f1, 4):<6} {col_sign_f1}\n" \
-                      f"{'count sample diff prec is twice tot diff prec':.<50} {twice_diff_prec:<5}/ {n_loops:<8}p < {round(p_prec, 4):<6} {col_sign_prec}\n" \
-                      f"{'count sample diff rec  is twice tot diff rec ':.<50} {twice_diff_rec:<5}/ {n_loops:<8}p < {round(p_rec, 4):<6} {col_sign_rec}\n" \
-                      f"{'count sample diff acc  is twice tot diff acc':.<50} {twice_diff_acc:<5}/ {n_loops:<8}p < {round(p_acc, 4):<6} {col_sign_acc}"
-
-            df_tot.s_f1   = ['', f'{sign_f1}{p_f1}']
-            df_tot.s_acc  = ['', f'{sign_acc}{p_acc}']
-            df_tot.s_prec = ['', f'{sign_prec}{p_prec}']
-            df_tot.s_rec  = ['', f'{sign_rec}{p_rec}']
+            str_out = (
+                f"\n{'count sample diff f1   is twice tot diff f1':.<50}"
+                f" {twice_diff_f1:<5}/ {n_loops:<8}p < {round(p_f1, 4):<6} {self._sign(p_f1, colored=True)}"
+                f"\n{'count sample diff prec is twice tot diff prec':.<50}"
+                f" {twice_diff_prec:<5}/ {n_loops:<8}p < {round(p_prec, 4):<6} {self._sign(p_prec, colored=True)}"
+                f"\n{'count sample diff rec  is twice tot diff rec ':.<50}"
+                f" {twice_diff_rec:<5}/ {n_loops:<8}p < {round(p_rec, 4):<6} {self._sign(p_rec, colored=True)}"
+                f"\n{'count sample diff acc  is twice tot diff acc':.<50}"
+                f" {twice_diff_acc:<5}/ {n_loops:<8}p < {round(p_acc, 4):<6} {self._sign(p_acc, colored=True)}")
 
             if targetclass is not None:
                 p_tgt_f1 = twice_diff_tgt_f1 / n_loops
                 p_tgt_prec = twice_diff_tgt_prec / n_loops
                 p_tgt_rec = twice_diff_tgt_rec / n_loops
 
-                col_sign_tgt_f1 = self._sign(p_tgt_f1, colored=True)
-                col_sign_tgt_prec = self._sign(p_tgt_prec, colored=True)
-                col_sign_tgt_rec = self._sign(p_tgt_rec, colored=True)
+                df_tgt.s_tf1 = ['', f'{self._sign(p_tgt_f1)}{p_tgt_f1}']
+                df_tgt.s_tprec = ['', f'{self._sign(p_tgt_prec)}{p_tgt_prec}']
+                df_tgt.s_trec = ['', f'{self._sign(p_tgt_rec)}{p_tgt_rec}']
 
-                sign_tgt_f1 = self._sign(p_tgt_f1)
-                sign_tgt_prec = self._sign(p_tgt_prec)
-                sign_tgt_rec = self._sign(p_tgt_rec)
-
-                str_out += f"\ntarget {targetclass} {'count sample diff f1   is twice tot diff f1':.<50} {twice_diff_tgt_f1:<5}/ {n_loops:<8}p < {round(p_tgt_f1, 4):<6} {col_sign_tgt_f1}\n" \
-                             f"target {targetclass} {'count sample diff prec is twice tot diff prec':.<50} {twice_diff_tgt_prec:<5}/ {n_loops:<8}p < {round(p_tgt_prec, 4):<6} {col_sign_tgt_prec}\n" \
-                             f"target {targetclass} {'count sample diff rec  is twice tot diff rec ':.<50} {twice_diff_tgt_rec:<5}/ {n_loops:<8}p < {round(p_tgt_rec, 4):<6} {col_sign_tgt_rec}"
-                df_tgt.s_tf1   = ['', sign_tgt_f1]
-                df_tgt.s_tprec = ['', sign_tgt_prec]
-                df_tgt.s_trec  = ['', sign_tgt_rec]
+                str_out += (
+                    f"\ntarget {targetclass} {'count sample diff f1   is twice tot diff f1':.<50}"
+                    f" {twice_diff_tgt_f1:<5}/ {n_loops:<8}p < {round(p_tgt_f1, 4):<6}"
+                    f" {self._sign(p_tgt_f1, colored=True)}"
+                    f"\ntarget {targetclass} {'count sample diff prec is twice tot diff prec':.<50}"
+                    f" {twice_diff_tgt_prec:<5}/ {n_loops:<8}p < {round(p_tgt_prec, 4):<6}"
+                    f" {self._sign(p_tgt_prec, colored=True)}"
+                    f"\ntarget {targetclass} {'count sample diff rec  is twice tot diff rec ':.<50}"
+                    f" {twice_diff_tgt_rec:<5}/ {n_loops:<8}p < {round(p_tgt_rec, 4):<6}"
+                    f" {self._sign(p_tgt_rec, colored=True)}")
             print(str_out)
             if self.savetsv:
                 df_tot.to_csv(f"{self.dirout}results.tsv", sep="\t")
@@ -562,9 +557,9 @@ class Bootstrap:
             return f'{BColor.red}**{BColor.reset}' if colored else '**'
         elif value < 0.05:
             return f'{BColor.red}*{BColor.reset}' if colored else '*'
-        elif value > 0.95:
-            return f'{BColor.grey}!{BColor.reset}' if colored else '!'
         elif value > 0.99:
             return f'{BColor.grey}!!{BColor.reset}' if colored else '!!'
+        elif value > 0.95:
+            return f'{BColor.grey}!{BColor.reset}' if colored else '!'
         else:
             return ''
